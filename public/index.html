@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1E1E2E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>NasMeister</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <h1>⚙️ NasMeister</h1>
+    <div class="header-right">
+      <button class="refresh-btn" id="refresh-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+          <path d="M8 16H3v5"/>
+        </svg>
+        Refresh
+      </button>
+      <div class="last-update" id="last-update">—</div>
+    </div>
+  </header>
+
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Dashboard
+    </button>
+    <button class="tab" data-tab="handbuch" onclick="switchTab('handbuch')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Handbuch
+    </button>
+  </nav>
+
+  <!-- ── Dashboard Tab ── -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="summary" id="summary">
+      <div class="summary-item"><span class="dot dot-grey"></span>Wird geladen…</div>
+    </div>
+
+    <main class="grid" id="grid">
+      <div class="card skeleton" style="height:190px"></div>
+      <div class="card skeleton" style="height:190px"></div>
+      <div class="card skeleton" style="height:190px"></div>
+    </main>
+
+    <footer class="footer">
+      <button class="btn-reboot" onclick="showRebootModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+        </svg>
+        NAS Neustart
+      </button>
+      <span class="footer-info">Auto-Refresh alle 15 s</span>
+    </footer>
+  </div>
+
+  <!-- ── Handbuch Tab ── -->
+  <div id="tab-handbuch" class="tab-content handbuch">
+
+    <div class="hb-hero">
+      <div class="hb-title">NasMeister Handbuch</div>
+      <div class="hb-sub">Control & Monitor für die Synology DS124</div>
+    </div>
+
+    <div class="hb-sections">
+
+      <details class="hb-section" open>
+        <summary>Was ist NasMeister?</summary>
+        <div class="hb-body">
+          <p>NasMeister ist das zentrale Cockpit für alle Node.js-Server-Instanzen auf der Synology NAS. Statt SSH-Terminal, mehreren Browserfenstern und manuellem <code>kill -9</code> gibt es hier eine einzige Oberfläche mit Ampelsystem.</p>
+          <p>NasMeister nutzt <strong>PM2</strong> als Prozessmanager im Hintergrund und ist selbst eine installierbare PWA (Android &amp; Browser).</p>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Was ist PM2?</summary>
+        <div class="hb-body">
+          <p>PM2 ist ein Prozessmanager für Node.js – vergleichbar mit einem Dienst-Manager speziell für Node-Apps.</p>
+          <p><strong>Vorteile gegenüber dem bisherigen <code>nohup node server.js &amp;</code>:</strong></p>
+          <ul>
+            <li>Automatischer Neustart bei Absturz</li>
+            <li>Start aller Apps nach NAS-Reboot (ersetzt DSM Task Scheduler)</li>
+            <li>Zentrales Log pro App (<code>pm2 logs</code>)</li>
+            <li>CPU/RAM-Monitoring eingebaut</li>
+            <li>Einfaches Kill &amp; Restart per Name statt PID-Suche</li>
+          </ul>
+          <p><strong>Wichtige PM2-Befehle (SSH):</strong></p>
+          <div class="code-block" onclick="copyCode(this)">pm2 list                    # alle Apps + Status
+pm2 restart zeiterfassung   # App neu starten
+pm2 stop    GartenMeister   # App stoppen
+pm2 start   LagerMeister    # App starten
+pm2 logs    TerminMeister   # Live-Log (Strg+C zum Beenden)
+pm2 logs    TerminMeister --lines 50  # letzte 50 Zeilen</div>
+          <p class="code-hint">Tippe/Klicke auf den Code-Block zum Kopieren</p>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Ersteinrichtung – PM2 auf der NAS</summary>
+        <div class="hb-body">
+          <p>Einmalig per SSH auf der Synology ausführen:</p>
+
+          <p><strong>1. SSH verbinden (via Tailscale):</strong></p>
+          <div class="code-block" onclick="copyCode(this)">ssh wolfg@&lt;tailscale-ip&gt;</div>
+
+          <p><strong>2. PM2 installieren:</strong></p>
+          <div class="code-block" onclick="copyCode(this)">npm install -g pm2</div>
+
+          <p><strong>3. Setup-Script ausführen:</strong></p>
+          <div class="code-block" onclick="copyCode(this)">bash /volume1/Gurktaler/nasmeister/pm2-setup.sh</div>
+
+          <p><strong>4. Autostart einrichten</strong> (den Befehl aus der Ausgabe kopieren und als root ausführen):</p>
+          <div class="code-block" onclick="copyCode(this)">pm2 startup
+# → gibt einen sudo-Befehl aus → diesen ausführen!
+pm2 save</div>
+
+          <p><strong>5. DSM Task Scheduler aufräumen:</strong><br>
+          Systemsteuerung → Aufgabenplaner → alte Einträge (start_synology.sh) löschen. PM2 übernimmt den Autostart.</p>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>NasMeister starten (manuell)</summary>
+        <div class="hb-body">
+          <p>Nach dem PM2-Setup startet NasMeister automatisch. Zum manuellen Start:</p>
+          <div class="code-block" onclick="copyCode(this)">ssh wolfg@&lt;tailscale-ip&gt;
+cd /volume1/Gurktaler/nasmeister
+npm install        # nur beim ersten Mal
+pm2 start server.js --name nasmeister --env PORT=4000</div>
+
+          <p>Erreichbar im Browser / Android:</p>
+          <div class="code-block" onclick="copyCode(this)">http://&lt;tailscale-ip&gt;:4000</div>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Als PWA auf Android installieren</summary>
+        <div class="hb-body">
+          <p>NasMeister ist installierbar – kein App Store nötig.</p>
+          <ol>
+            <li>Chrome auf Android öffnen</li>
+            <li>Adresse eingeben: <code>http://&lt;tailscale-ip&gt;:4000</code></li>
+            <li>Menü (⋮) → <strong>„Zum Startbildschirm hinzufügen"</strong></li>
+            <li>Name bestätigen → <strong>Hinzufügen</strong></li>
+          </ol>
+          <p>NasMeister erscheint jetzt als App-Icon auf dem Homescreen und startet im Vollbild ohne Browserleiste.</p>
+          <p><strong>Voraussetzung:</strong> Tailscale muss auf dem Android-Gerät aktiv sein.</p>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Neue App hinzufügen</summary>
+        <div class="hb-body">
+          <p>In <code>config.json</code> auf der NAS einen Eintrag ergänzen:</p>
+          <div class="code-block" onclick="copyCode(this)">{
+  "name": "MeineNeueApp",
+  "port": 3007,
+  "dir": "/volume1/Gurktaler/MeineNeueApp",
+  "startScript": "server.js",
+  "healthPath": "/api/health",
+  "color": "#1565C0"
+}</div>
+          <p>Danach PM2 registrieren:</p>
+          <div class="code-block" onclick="copyCode(this)">pm2 start /volume1/Gurktaler/MeineNeueApp/server.js \
+  --name MeineNeueApp \
+  --env PORT=3007
+pm2 save</div>
+          <p>NasMeister neu starten:</p>
+          <div class="code-block" onclick="copyCode(this)">pm2 restart nasmeister</div>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Health-Endpunkt zu einer App hinzufügen</summary>
+        <div class="hb-body">
+          <p>Damit NasMeister den Status einer App korrekt anzeigen kann, braucht jede App einen <code>/api/health</code>-Endpunkt. Diesen Snippet in das jeweilige <code>server.js</code> einfügen:</p>
+          <div class="code-block" onclick="copyCode(this)">// Health-Check für NasMeister
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', name: 'AppName', uptime: process.uptime() });
+});</div>
+          <p>Bei reinen Node.js-Servern ohne Express (z. B. mit <code>http.createServer</code>):</p>
+          <div class="code-block" onclick="copyCode(this)">if (req.url === '/api/health' &amp;&amp; req.method === 'GET') {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify({ status: 'ok' }));
+}</div>
+          <p>Nach dem Einfügen App neu starten:</p>
+          <div class="code-block" onclick="copyCode(this)">pm2 restart &lt;AppName&gt;</div>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Ampel-Zustände verstehen</summary>
+        <div class="hb-body">
+          <table class="hb-table">
+            <tr><td>🟢 <strong>Online</strong></td><td>PM2 meldet „online" UND <code>/api/health</code> antwortet mit 200</td></tr>
+            <tr><td>🟡 <strong>Degraded</strong></td><td>PM2 meldet „online", aber <code>/api/health</code> antwortet nicht korrekt (App läuft, aber nicht gesund)</td></tr>
+            <tr><td>🔴 <strong>Gestoppt</strong></td><td>PM2 meldet „stopped" – App wurde manuell gestoppt</td></tr>
+            <tr><td>🔴 <strong>Fehler</strong></td><td>PM2 meldet „errored" – App ist abgestürzt</td></tr>
+            <tr><td>⚫ <strong>Unbekannt</strong></td><td>App ist nicht in PM2 registriert</td></tr>
+          </table>
+          <p>Bei „Degraded": App neu starten hilft meist. Wenn das Problem bleibt: Logs prüfen (<code>pm2 logs &lt;name&gt;</code>).</p>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Troubleshooting</summary>
+        <div class="hb-body">
+          <p><strong>NasMeister nicht erreichbar:</strong></p>
+          <ul>
+            <li>Tailscale auf dem Gerät aktiv? → Tailscale-App öffnen und verbinden</li>
+            <li>NAS läuft? → DSM-Weboberfläche aufrufen</li>
+            <li>NasMeister-Prozess läuft? → SSH: <code>pm2 list</code></li>
+          </ul>
+
+          <p><strong>Alle Apps zeigen „Unbekannt":</strong></p>
+          <ul>
+            <li>PM2 noch nicht eingerichtet → <code>pm2-setup.sh</code> ausführen</li>
+            <li>PM2 nicht gefunden → Pfad in <code>config.json</code> oder Env <code>PM2_BIN</code> prüfen</li>
+          </ul>
+
+          <p><strong>App startet nicht (Fehler-Status):</strong></p>
+          <div class="code-block" onclick="copyCode(this)">pm2 logs &lt;AppName&gt; --lines 100</div>
+          <p>Häufige Ursachen: Port bereits belegt, fehlende <code>node_modules</code> (<code>npm install</code> im App-Verzeichnis ausführen), Syntax-Fehler nach einem Update.</p>
+
+          <p><strong>Nach NAS-Neustart laufen die Apps nicht:</strong></p>
+          <div class="code-block" onclick="copyCode(this)">pm2 startup   # → gibt sudo-Befehl aus → ausführen
+pm2 save      # → speichert aktuelle Prozessliste</div>
+        </div>
+      </details>
+
+      <details class="hb-section">
+        <summary>Über NasMeister</summary>
+        <div class="hb-body">
+          <p>NasMeister v1.0 · Entwickelt mit Claude Code<br>
+          Stack: Node.js · Express · Vanilla JS PWA · PM2</p>
+          <p>Roadmap &amp; Dokumentation: <code>ROADMAP.md</code> im Projektverzeichnis</p>
+        </div>
+      </details>
+
+    </div><!-- .hb-sections -->
+  </div><!-- #tab-handbuch -->
+
+  <!-- Reboot Modal -->
+  <div class="modal-overlay" id="reboot-modal">
+    <div class="modal">
+      <h2>⚠️ NAS Neustart</h2>
+      <p>Die Synology wird neu gestartet. Alle laufenden Dienste werden beendet. Dies dauert ca. 2–3 Minuten.</p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="hideRebootModal()">Abbrechen</button>
+        <button class="btn btn-stop" onclick="confirmReboot()">Jetzt neu starten</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
