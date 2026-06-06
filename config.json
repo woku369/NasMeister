@@ -9,52 +9,36 @@
       "color": "#1565C0"
     },
     {
-      "name": "TerminMeister",
-      "port": 3001,
-      "dir": "/volume1/Gurktaler/TerminMeister",
-      "startScript": "server.js",
-      "healthPath": "/api/health",
-      "color": "#2E7D32"
-    },
-    {
-      "name": "GartenMeister",
+      "name": "zweipunktnull",
       "port": 3002,
-      "dir": "/volume1/Gurktaler/GartenMeister",
-      "startScript": "server.js",
-      "healthPath": "/api/health",
-      "color": "#388E3C"
-    },
-    {
-      "name": "Gurktaler-2.0",
-      "port": 3003,
-      "dir": "/volume1/Gurktaler/Gurktaler-2.0",
+      "dir": "/volume1/Gurktaler/zweipunktnull",
       "startScript": "server.js",
       "healthPath": "/api/health",
       "color": "#6A1B9A"
     },
     {
-      "name": "LagerMeister",
-      "port": 3004,
-      "dir": "/volume1/Gurktaler/LagerMeister",
+      "name": "gartenmeister",
+      "port": 3003,
+      "dir": "/volume1/Gurktaler/gartenmeister/nas",
+      "startScript": "server-gartenmeister.js",
+      "healthPath": "/api/health",
+      "color": "#388E3C"
+    },
+    {
+      "name": "terminmeister",
+      "port": 3005,
+      "dir": "/volume1/Gurktaler/terminmeister",
+      "startScript": "server.js",
+      "healthPath": "/api/health",
+      "color": "#2E7D32"
+    },
+    {
+      "name": "lagermeister",
+      "port": 3006,
+      "dir": "/volume1/Gurktaler/lagermeister",
       "startScript": "server.js",
       "healthPath": "/api/health",
       "color": "#E65100"
-    },
-    {
-      "name": "MazerationsMeister",
-      "port": 3005,
-      "dir": "/volume1/Gurktaler/MazerationsMeister",
-      "startScript": "server.js",
-      "healthPath": "/api/health",
-      "color": "#795548"
-    },
-    {
-      "name": "Huf-Macherin",
-      "port": 3006,
-      "dir": "/volume1/Gurktaler/Huf-Macherin",
-      "startScript": "server.js",
-      "healthPath": "/api/health",
-      "color": "#00838F"
     }
   ]
 }

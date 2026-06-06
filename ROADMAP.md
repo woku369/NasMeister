@@ -1,7 +1,7 @@
 # NasMeister – Roadmap
 
 > Automatisch gepflegt via `/roadmap`. Manuell aktualisieren nach größeren Änderungen.
-> Letztes Update: 2026-06-05 – v1.0 Grundgerüst
+> Letztes Update: 2026-06-06 – config.json + pm2-setup.sh auf tatsächliche NAS-Struktur korrigiert
 
 ---
 
@@ -20,17 +20,17 @@ Killen und Neustarten von Next.js/Node.js-Apps.
 | Xiaomi Poco X7 Pro | Android – primärer NasMeister-Client |
 | Homeoffice-PC / Surface | Windows – Browser-Zugriff |
 
-**Verwaltete Apps:**
-| Name | Port | Technologie |
-|---|---|---|
-| zeiterfassung | 3000 | Node.js (standalone) |
-| TerminMeister | 3001 | Node.js |
-| GartenMeister | 3002 | TypeScript/Next.js |
-| Gurktaler-2.0 | 3003 | TypeScript/Next.js |
-| LagerMeister | 3004 | TypeScript |
-| MazerationsMeister | 3005 | TypeScript/Next.js |
-| Huf-Macherin | 3006 | TypeScript |
-| NasMeister (selbst) | 4000 | Node.js (standalone) |
+**Verwaltete Apps (tatsächliche NAS-Struktur):**
+| PM2-Name | Port | Pfad auf NAS | Startscript |
+|---|---|---|---|
+| zeiterfassung | 3000 | `zeiterfassung/backend/` | `server.js` |
+| zweipunktnull | 3002 | `zweipunktnull/` | `server.js` |
+| gartenmeister | 3003 | `gartenmeister/nas/` | `server-gartenmeister.js` |
+| terminmeister | 3005 | `terminmeister/` | `server.js` |
+| lagermeister | 3006 | `lagermeister/` | `server.js` |
+| nasmeister (selbst) | 4000 | `nasmeister/` | `server.js` |
+
+> **Geplant (noch nicht migriert):** Huf-Macherin
 
 ---
 
@@ -67,30 +67,27 @@ Killen und Neustarten von Next.js/Node.js-Apps.
 
 ### Kurzfristig – PM2 Migration & Stabilisierung
 
+- [x] **NAS-Pfade verifiziert und korrigiert:**
+  - Tatsächliche Verzeichnisstruktur per SSH geprüft
+  - `config.json` und `pm2-setup.sh` auf reale Pfade/Ports aktualisiert
+  - MazerationsMeister (Electron/Windows) und Huf-Macherin (noch nicht auf NAS) entfernt
+
 - [ ] **PM2 auf NAS installieren** (einmalig via SSH):
   - `npm install -g pm2`
-  - Alle 7 Apps + NasMeister via `pm2-setup.sh` registrieren
+  - Alle 5 Apps + NasMeister via `pm2-setup.sh` registrieren
   - `pm2 startup` + `pm2 save` → DSM Task Scheduler Einträge können danach entfernt werden
-  - NAS-Pfade in `config.json` und `pm2-setup.sh` an tatsächliche Verzeichnisstruktur anpassen
 
 - [ ] **Health-Endpunkte prüfen und ergänzen:**
   - zeiterfassung: `/api/health` ✓ vorhanden
-  - TerminMeister: prüfen / ergänzen
-  - GartenMeister: prüfen / ergänzen
-  - Gurktaler-2.0: prüfen / ergänzen
-  - LagerMeister: prüfen / ergänzen
-  - MazerationsMeister: prüfen / ergänzen
-  - Huf-Macherin: prüfen / ergänzen
-  - Standard-Snippet bereitstellen (copy-paste in jedes `server.js`)
+  - zweipunktnull (Gurktaler 2.0): prüfen / ergänzen
+  - gartenmeister: prüfen / ergänzen
+  - terminmeister: prüfen / ergänzen
+  - lagermeister: prüfen / ergänzen
+  - Standard-Snippet bereits im Handbuch-Tab (copy-paste in jedes `server.js`)
 
-- [ ] **NAS-Pfade verifizieren:**
-  - Tatsächliche Verzeichnisstruktur auf der DS124 prüfen
-  - `config.json` und `pm2-setup.sh` aktualisieren
-
-- [ ] **Handbuch-Tab** in der PWA:
-  - Sidetab / separater Screen mit Dokumentation
-  - Abschnitte: PM2-Grundlagen, NAS-Zugriff, Apps verwalten, Troubleshooting
-  - Code-Blöcke mit Copy-Tap (wie in zeiterfassung-Handbuch)
+- [x] **Handbuch-Tab** in der PWA:
+  - Sidetab mit PM2-Grundlagen, NAS-Zugriff, Troubleshooting, Ampel-Erklärung
+  - Code-Blöcke mit Copy-Tap
 
 - [ ] **App als PWA auf Android installieren und testen:**
   - Browser öffnen → `http://<tailscale-ip>:4000`
@@ -185,8 +182,7 @@ App nicht in PM2 registriert  → status: "unknown"  ⚫
 | Thema | Details |
 |---|---|
 | PM2 noch nicht installiert | Einmalige SSH-Session erforderlich (`pm2-setup.sh`) |
-| NAS-Pfade noch zu verifizieren | `config.json` enthält Annahmen – anpassen nötig |
-| Health-Endpunkte fehlen | Ältere Apps (GartenMeister, MazerationsMeister) haben noch kein `/api/health` → Status bleibt `degraded` bis ergänzt |
+| Health-Endpunkte fehlen | Ältere Apps (gartenmeister, terminmeister, lagermeister, zweipunktnull) haben noch kein `/api/health` → Status bleibt `degraded` bis ergänzt |
 | NAS-Reboot benötigt sudo | `sudo reboot` in `server.js` – auf Synology ggf. Berechtigungen konfigurieren |
 | Kein HTTPS | Nur über Tailscale nutzbar (verschlüsseltes VPN-Tunnel) – kein öffentlicher Zugriff |
 | Service Worker Cache | Bei Updates: einmal hard refresh im Browser (Strg+Shift+R) nötig |

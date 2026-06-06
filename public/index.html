@@ -99,12 +99,12 @@
             <li>Einfaches Kill &amp; Restart per Name statt PID-Suche</li>
           </ul>
           <p><strong>Wichtige PM2-Befehle (SSH):</strong></p>
-          <div class="code-block" onclick="copyCode(this)">pm2 list                    # alle Apps + Status
-pm2 restart zeiterfassung   # App neu starten
-pm2 stop    GartenMeister   # App stoppen
-pm2 start   LagerMeister    # App starten
-pm2 logs    TerminMeister   # Live-Log (Strg+C zum Beenden)
-pm2 logs    TerminMeister --lines 50  # letzte 50 Zeilen</div>
+          <div class="code-block" onclick="copyCode(this)">pm2 list                     # alle Apps + Status
+pm2 restart zeiterfassung    # App neu starten
+pm2 stop    gartenmeister    # App stoppen
+pm2 start   lagermeister     # App starten
+pm2 logs    terminmeister    # Live-Log (Strg+C zum Beenden)
+pm2 logs    terminmeister --lines 50  # letzte 50 Zeilen</div>
           <p class="code-hint">Tippe/Klicke auf den Code-Block zum Kopieren</p>
         </div>
       </details>
@@ -140,7 +140,8 @@ pm2 save</div>
           <div class="code-block" onclick="copyCode(this)">ssh wolfg@&lt;tailscale-ip&gt;
 cd /volume1/Gurktaler/nasmeister
 npm install        # nur beim ersten Mal
-pm2 start server.js --name nasmeister --env PORT=4000</div>
+PORT=4000 API_KEY=NM-Gurktaler-2026 PM2_BIN=/usr/local/bin/pm2 \
+  pm2 start server.js --name nasmeister --cwd /volume1/Gurktaler/nasmeister</div>
 
           <p>Erreichbar im Browser / Android:</p>
           <div class="code-block" onclick="copyCode(this)">http://&lt;tailscale-ip&gt;:4000</div>
@@ -175,9 +176,9 @@ pm2 start server.js --name nasmeister --env PORT=4000</div>
   "color": "#1565C0"
 }</div>
           <p>Danach PM2 registrieren:</p>
-          <div class="code-block" onclick="copyCode(this)">pm2 start /volume1/Gurktaler/MeineNeueApp/server.js \
+          <div class="code-block" onclick="copyCode(this)">PORT=3007 pm2 start /volume1/Gurktaler/MeineNeueApp/server.js \
   --name MeineNeueApp \
-  --env PORT=3007
+  --cwd /volume1/Gurktaler/MeineNeueApp
 pm2 save</div>
           <p>NasMeister neu starten:</p>
           <div class="code-block" onclick="copyCode(this)">pm2 restart nasmeister</div>

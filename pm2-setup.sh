@@ -1,7 +1,11 @@
 #!/bin/sh
 # PM2 Setup – einmalig per SSH auf der Synology ausführen
-# Danach: pm2 list  zeigt alle Apps
-#         pm2 startup / pm2 save  für Autostart nach Reboot
+# Voraussetzung: Node.js v20 Package installiert
+#
+# Ausführen: sh /volume1/Gurktaler/nasmeister/pm2-setup.sh
+# Danach:    pm2 list            → alle Apps anzeigen
+#            pm2 logs <name>     → Live-Log einer App
+#            pm2 startup / pm2 save  → Autostart nach Reboot
 
 NODE=/var/packages/Node.js_v20/target/usr/local/bin/node
 NPM=/var/packages/Node.js_v20/target/usr/local/bin/npm
@@ -10,52 +14,47 @@ BASE=/volume1/Gurktaler
 echo "=== PM2 installieren ==="
 $NPM install -g pm2
 
+# PM2-Pfad nach npm global install
 PM2=/usr/local/bin/pm2
 
 echo ""
 echo "=== Apps registrieren ==="
 
-$PM2 start $BASE/zeiterfassung/backend/server.js \
+# zeiterfassung – Port 3000
+PORT=3000 API_KEY=ZE-Gurktaler-2026 DATA_DIR=$BASE/zeiterfassung/backend/data \
+  $PM2 start $BASE/zeiterfassung/backend/server.js \
   --name zeiterfassung \
-  --env PORT=3000 \
-  --env API_KEY=ZE-Gurktaler-2026 \
-  --env DATA_DIR=$BASE/zeiterfassung/backend/data
+  --cwd $BASE/zeiterfassung/backend
 
-$PM2 start $BASE/TerminMeister/server.js \
-  --name TerminMeister \
-  --env PORT=3001 \
-  --env API_KEY=TM-Gurktaler-2026
+# zweipunktnull (Gurktaler 2.0) – Port 3002 (via nginx proxy)
+PORT=3002 \
+  $PM2 start $BASE/zweipunktnull/server.js \
+  --name zweipunktnull \
+  --cwd $BASE/zweipunktnull
 
-$PM2 start $BASE/GartenMeister/server.js \
-  --name GartenMeister \
-  --env PORT=3002 \
-  --env API_KEY=GM-Gurktaler-2026
+# gartenmeister – Port 3003 (Startscript liegt in nas/)
+PORT=3003 \
+  $PM2 start $BASE/gartenmeister/nas/server-gartenmeister.js \
+  --name gartenmeister \
+  --cwd $BASE/gartenmeister/nas
 
-$PM2 start $BASE/Gurktaler-2.0/server.js \
-  --name Gurktaler-2.0 \
-  --env PORT=3003 \
-  --env API_KEY=G2-Gurktaler-2026
+# terminmeister – Port 3005
+PORT=3005 \
+  $PM2 start $BASE/terminmeister/server.js \
+  --name terminmeister \
+  --cwd $BASE/terminmeister
 
-$PM2 start $BASE/LagerMeister/server.js \
-  --name LagerMeister \
-  --env PORT=3004 \
-  --env API_KEY=LM-Gurktaler-2026
+# lagermeister – Port 3006 (nutzt APP_PORT statt PORT)
+APP_PORT=3006 APP_BASE=$BASE/lagermeister \
+  $PM2 start $BASE/lagermeister/server.js \
+  --name lagermeister \
+  --cwd $BASE/lagermeister
 
-$PM2 start $BASE/MazerationsMeister/server.js \
-  --name MazerationsMeister \
-  --env PORT=3005 \
-  --env API_KEY=MM-Gurktaler-2026
-
-$PM2 start $BASE/Huf-Macherin/server.js \
-  --name Huf-Macherin \
-  --env PORT=3006 \
-  --env API_KEY=HM-Gurktaler-2026
-
-$PM2 start $BASE/nasmeister/server.js \
+# nasmeister selbst – Port 4000
+PORT=4000 API_KEY=NM-Gurktaler-2026 PM2_BIN=/usr/local/bin/pm2 \
+  $PM2 start $BASE/nasmeister/server.js \
   --name nasmeister \
-  --env PORT=4000 \
-  --env API_KEY=NM-Gurktaler-2026 \
-  --env PM2_BIN=/usr/local/bin/pm2
+  --cwd $BASE/nasmeister
 
 echo ""
 echo "=== Autostart einrichten ==="
@@ -67,5 +66,6 @@ echo "=== Status ==="
 $PM2 list
 
 echo ""
-echo "WICHTIG: Den pm2 startup Befehl aus der Ausgabe oben als root ausführen!"
-echo "DSM Task Scheduler Einträge können danach gelöscht werden."
+echo "WICHTIG: Den 'pm2 startup' Befehl aus der Ausgabe oben als root ausführen!"
+echo "Erst danach sind die Apps nach einem NAS-Neustart automatisch aktiv."
+echo "DSM Task Scheduler Einträge können dann schrittweise deaktiviert werden."
